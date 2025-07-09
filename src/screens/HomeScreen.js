@@ -1,40 +1,25 @@
 import React from "react";
-import { View, StyleSheet, Text, Button, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Button,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native";
+
+import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Feather from "@expo/vector-icons/Feather";
+
+import { useContext } from "react";
+import { ExpenseContext } from "../context/ExpenseContext";
+
 export default function HomeScreen({ navigation }) {
   const Spending = 320;
-  const data = [
-    { id: "1", activity: "Groceries", category: "Food", price: "₹250" },
-    { id: "2", activity: "Uber Ride", category: "Transport", price: "₹180" },
-    { id: "3", activity: "Coffee", category: "Food", price: "₹60" },
-    {
-      id: "4",
-      activity: "Mobile Recharge",
-      category: "Utilities",
-      price: "₹149",
-    },
-    { id: "5", activity: "Notebook", category: "Stationery", price: "₹120" },
-    {
-      id: "6",
-      activity: "Electricity Bill",
-      category: "Utilities",
-      price: "₹450",
-    },
-    {
-      id: "7",
-      activity: "Movie Ticket",
-      category: "Entertainment",
-      price: "₹300",
-    },
-    { id: "8", activity: "Fast Food", category: "Food", price: "₹220" },
-    { id: "9", activity: "Gym Fee", category: "Health", price: "₹600" },
-    {
-      id: "10",
-      activity: "Internet Bill",
-      category: "Utilities",
-      price: "₹799",
-    },
-  ];
+  const {expenses , dispatch} = useContext(ExpenseContext)
+  
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F7F7ff" }}>
       <View style={{ flex: 1 }}>
@@ -53,14 +38,15 @@ export default function HomeScreen({ navigation }) {
           }}
         >
           <FlatList
-            data={data}
+            data={expenses}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View
                 style={{
                   padding: 10,
-                  margin:2,
-                  borderRadius:5,
+                  margin: 2,
+                  marginBottom: 4,
+                  borderRadius: 5,
                   borderBottomWidth: 1,
                   borderColor: "#ccc",
                   backgroundColor: "rgb(232, 232, 232)",
@@ -74,14 +60,24 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
         <View style={styles.buttonContainer}>
-          <Button
-            title="Add Expense"
-            onPress={() => navigation.navigate("AddExpense")}
-          />
-          <Button
-            title="Analytics"
+          <TouchableOpacity
+            style={styles.button}
             onPress={() => navigation.navigate("Analytics")}
-          />
+          >
+            <Ionicons name="analytics-sharp" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Settings")}
+          >
+            <Feather name="settings" size={24} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("AddExpense")}
+          >
+            <FontAwesome6 name="add" size={24} color="black" />
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -100,21 +96,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     margin: 60,
-    marginBottom:40
+    marginBottom: 40,
   },
   Spending_text: {
     fontFamily: "monospace",
     fontWeight: "bold",
   },
   buttonContainer: {
+    flexDirection: "row", // ← horizontal layout
+    justifyContent: "space-evenly", // ← space buttons evenly
+    alignItems: "center",
     padding: 16,
     backgroundColor: "#F7F7F7ff",
+    marginBottom:50
+  },
+
+  button: {
+    backgroundColor: "rgb(92, 174, 255)",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
 /*
 SCSS HEX 
-$dodger-blue: #3399FFff;
+$dodger-blue:rgb(92, 174, 255);
 $davys-gray: #51514Fff;
 $dutch-white: #EFE3BFff;
 $dutch-white-black:rgb(221, 204, 154);
