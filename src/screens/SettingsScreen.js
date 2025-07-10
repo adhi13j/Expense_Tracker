@@ -10,7 +10,15 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 
+
+import { ExpenseContext } from "../context/ExpenseContext";
+import { HistoryContext } from "../context/HistoryContext";
+
 export default function SettingsScreen({ navigation }) {
+  
+  const { expenses, dispatch } = useContext(ExpenseContext);
+  const { dispatch: historyDispatch } = useContext(HistoryContext);
+  
   const [darkMode, setDarkMode] = useState(false);
   const [currency, setCurrency] = useState("₹");
 
@@ -20,7 +28,13 @@ export default function SettingsScreen({ navigation }) {
       "This will delete all expenses. Are you sure?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Reset", onPress: () => console.log("Data reset") },
+        {
+          text: "Reset",
+          onPress: () => {
+            dispatch({ type: "Clear_All" });
+            historyDispatch({ type: "clearAll" });
+          },
+        },
       ]
     );
   };
@@ -108,4 +122,3 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
-  

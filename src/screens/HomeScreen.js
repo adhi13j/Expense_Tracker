@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   Button,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native";
 
@@ -14,18 +15,34 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Feather from "@expo/vector-icons/Feather";
 
 import { useContext } from "react";
+
 import { ExpenseContext } from "../context/ExpenseContext";
+import { HistoryContext } from "../context/HistoryContext";
+
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function HomeScreen({ navigation }) {
-  const Spending = 320;
-  const {expenses , dispatch} = useContext(ExpenseContext)
-  
+  const [spending, setspending] = useState(0);
+
+  const { expenses, dispatch } = useContext(ExpenseContext);
+  const { dispatch: historyDispatch } = useContext(HistoryContext);
+
+  useFocusEffect(
+    useCallback(() => {
+      let total = 0;
+      for (let i = 0; i < expenses.length; i++) {
+        const price = parseFloat(expenses[i].price.replace("₹", ""));
+        if (!isNaN(price)) total += price;
+      }
+      setspending(total);
+    }, [expenses])
+  );
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F7F7ff" }}>
       <View style={{ flex: 1 }}>
         <View style={styles.Spending_box}>
           <Text style={styles.Spending_text}>
-            Todays spending : {Spending} ₹
+            Todays spending : {spending} ₹
           </Text>
         </View>
         <View
@@ -50,11 +67,53 @@ export default function HomeScreen({ navigation }) {
                   borderBottomWidth: 1,
                   borderColor: "#ccc",
                   backgroundColor: "rgb(232, 232, 232)",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                 }}
               >
-                <Text style={{ fontWeight: "bold" }}>{item.activity}</Text>
-                <Text>Category: {item.category}</Text>
-                <Text>Amount: {item.price}</Text>
+                <View>
+                  <Text style={{ fontWeight: "bold" }}>{item.activity}</Text>
+                  <Text>Category: {item.category}</Text>
+                  <Text>Amount: {item.price}</Text>
+                </View>
+                <View style={{ justifyContent: "space-evenly" }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      //change to edit screen
+                      navigation.navigate("EditScreen", { id: item.id });
+                      //console.log("edit for ", { item });
+                    }}
+                  >
+                    <Feather name="edit" size={24} color="black" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        `REMOVE THIS ITEM ${item.activity}?`,
+                        "THIS IS IRREVERSABLE",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          {
+                            text: "Delete",
+                            onPress: () => {
+                              ddispatch({
+                                type: "Remove_Expense",
+                                payload: { id: item.id },
+                              });
+                              historyDispatch({
+                                type: "deleteExpense",
+                                payload: item.id,
+                              });                              
+                            },
+                          },
+                        ]
+                      );
+                      //console.log("delete for ", { item });
+                    }}
+                  >
+                    <Feather name="delete" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           />
@@ -108,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     backgroundColor: "#F7F7F7ff",
-    marginBottom:50
+    marginBottom: 50,
   },
 
   button: {

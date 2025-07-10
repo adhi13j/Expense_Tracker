@@ -1,21 +1,30 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
-
 import { useContext } from "react";
-import { ExpenseContext } from "../context/ExpenseContext";
-import { HistoryContext } from "../context/HistoryContext";
+import { ExpenseContext } from "../../context/ExpenseContext";
+import { HistoryContext } from "../../context/HistoryContext";
 
-export default function AddExpenseScreen({ navigation }) {
-
-  const {expenses,dispatch} = useContext(ExpenseContext)
-
+export default function EditScreen({ navigation , route}) {
+  const { expenses, dispatch } = useContext(ExpenseContext);
+  const { dispatch: historyDispatch } = useContext(HistoryContext);
+  
   const [activity, setActivity] = useState("");
   const [category, setCategory] = useState("Food");
   const [amount, setAmount] = useState("");
 
-  const { dispatch: historyDispatch } = useContext(HistoryContext);
+  const { id } = route.params; 
+  const expense_to_edit = expenses.find((expense) => expense.id === id);
+
+  useEffect(() => {
+    if (expense_to_edit) {
+      setActivity(expense_to_edit.activity);
+      setCategory(expense_to_edit.category);
+      setAmount(expense_to_edit.price);
+    }
+  }, [expense_to_edit]);
+
   const handleAddExpense = () => {
     if (!activity || !amount) {
       Alert.alert("Validation Error", "Activity and Amount are required");
@@ -32,12 +41,12 @@ export default function AddExpenseScreen({ navigation }) {
       type: "Add_Expense",
       payload: newExpense,
     });
-        
     historyDispatch({
-      type: "saveExpense",
-      payload: newExpense,
+      type: "editExpense",
+      payload: { id: updatedExpense.id, updatedExpense },
     });
- //   console.log("Expense added:", newExpense);
+
+    //   console.log("Expense added:", newExpense);
     // You can pass this data via context, props, or storage
 
     navigation.goBack(); // Navigate back after adding
@@ -104,4 +113,3 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
 });
-  
