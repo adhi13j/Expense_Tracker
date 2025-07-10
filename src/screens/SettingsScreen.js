@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useContext} from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 import { ExpenseContext } from "../context/ExpenseContext";
@@ -21,7 +22,6 @@ export default function SettingsScreen({ navigation }) {
   
   const [darkMode, setDarkMode] = useState(false);
   const [currency, setCurrency] = useState("₹");
-
   const handleReset = () => {
     Alert.alert(
       "Reset All Data?",
@@ -30,14 +30,22 @@ export default function SettingsScreen({ navigation }) {
         { text: "Cancel", style: "cancel" },
         {
           text: "Reset",
-          onPress: () => {
-            dispatch({ type: "Clear_All" });
-            historyDispatch({ type: "clearAll" });
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem("@history"); // <-- clear local storage
+              dispatch({ type: "Clear_All" }); // clear expenses in memory
+              historyDispatch({ type: "clearAll" }); // clear history in memory
+              Alert.alert("Data Reset", "All data has been cleared.");
+            } catch (err) {
+              console.error("Failed to reset storage:", err);
+              Alert.alert("Error", "Failed to reset data.");
+            }
           },
         },
       ]
     );
   };
+  
 
   return (
     <View style={styles.container}>
